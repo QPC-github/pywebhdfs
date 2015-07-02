@@ -248,7 +248,7 @@ class PyWebHdfsClient(object):
         if not response.status_code == http_client.OK:
             _raise_pywebhdfs_exception(response.status_code, response.content)
 
-        return True
+        return response.json()
 
     def delete_file_dir(self, path, recursive=False):
         """
