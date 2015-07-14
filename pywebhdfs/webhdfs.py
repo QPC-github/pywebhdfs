@@ -339,6 +339,42 @@ class PyWebHdfsClient(object):
 
         return response.json()
 
+    def get_content_summary(self, path):
+        """
+        Get the content summary of a directory on HDFS
+
+        :param path: the HDFS file path without a leading '/'
+
+        The function wraps the WebHDFS REST call:
+
+        GET http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=GETCONTENTSUMMARY
+
+        Example for getting a directory's content summary:
+
+        >>> hdfs = PyWebHdfsClient(host='host',port='50070', user_name='hdfs')
+        >>> my_folder = 'user/hdfs/data/'
+        >>> hdfs.get_file_dir_status(my_folder)
+        {
+            "ContentSummary":
+            {
+                "directoryCount": 2,
+                "fileCount": 1,
+                "length": 24930,
+                "quota": -1,
+                "spaceConsumed": 24930,
+                "spaceQuota": -1
+            }
+        }
+        """
+
+        uri = self._create_uri(path, operations.GETCONTENTSUMMARY)
+        response = requests.get(uri, allow_redirects=True)
+
+        if not response.status_code == http_client.OK:
+            _raise_pywebhdfs_exception(response.status_code, response.content)
+
+        return response.json()
+
     def get_file_checksum(self, path):
         """
         Get the file_checksum of a single file on HDFS

@@ -299,6 +299,51 @@ class WhenTestingGetFileStatusOperation(unittest.TestCase):
         for key in result:
             self.assertEqual(result[key], self.file_status[key])
 
+
+class WhenTestingGetContentSummaryOperation(unittest.TestCase):
+
+    def setUp(self):
+
+        self.host = 'hostname'
+        self.port = '00000'
+        self.user_name = 'username'
+        self.webhdfs = PyWebHdfsClient(host=self.host, port=self.port,
+                                       user_name=self.user_name)
+        self.response = MagicMock()
+        self.requests = MagicMock(return_value=self.response)
+        self.path = 'user/hdfs/old_dir'
+        self.response = MagicMock()
+        self.file_status = {
+            "ContentSummary": {
+                "directoryCount": 2,
+                "fileCount": 1,
+                "length": 24930,
+                "quota": -1,
+                "spaceConsumed": 24930,
+                "spaceQuota": -1
+            }
+        }
+        self.response.json = MagicMock(return_value=self.file_status)
+
+    def test_get_status_throws_exception_for_not_ok(self):
+
+        self.response.status_code = http_client.BAD_REQUEST
+        self.requests.get.return_value = self.response
+        with patch('pywebhdfs.webhdfs.requests', self.requests):
+            with self.assertRaises(errors.PyWebHdfsException):
+                self.webhdfs.get_content_summary(self.path)
+
+    def test_get_status_returns_true(self):
+
+        self.response.status_code = http_client.OK
+        self.requests.get.return_value = self.response
+        with patch('pywebhdfs.webhdfs.requests', self.requests):
+            result = self.webhdfs.get_content_summary(self.path)
+
+        for key in result:
+            self.assertEqual(result[key], self.file_status[key])
+
+
 class WhenTestingGetFileChecksumOperation(unittest.TestCase):
 
     def setUp(self):
